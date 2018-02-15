@@ -2,21 +2,26 @@ import numpy as np
 import pandas as pd
 
 from .models import RevolutionDataFrame
+from .tools import process_revolutions
 
 
 DEFAULT_CALIBRATION_VALUE = -263
 CRANK_LENGTH = 0.1725
 
 
-def import_from_file(filepath_or_buffer):
-    df = pd.read_csv(
+def load_raw(filepath_or_buffer):
+    return pd.read_csv(
         filepath_or_buffer=filepath_or_buffer,
         sep='\t',
         skiprows=range(8),
         index_col=0,
         names=['index', 'time', 'x_force', 'y_force', 'power', 'torque', 'cadence', 'angle', 'longitude', 'latitude']
     )
-    return RevolutionDataFrame(df)
+
+
+def load(filepath_or_buffer):
+    raw_data = load_raw(filepath_or_buffer)
+    return process_revolutions(raw_data)
 
 def zero_offset(power, calibration_value=DEFAULT_CALIBRATION_VALUE):
     power = power + calibration_value
@@ -25,17 +30,6 @@ def zero_offset(power, calibration_value=DEFAULT_CALIBRATION_VALUE):
 def cadence_to_radians(cadence):
     return cadence / 60 * np.pi
 
-def group_revolutions(angle):
-    angle_diffs = angle - angle.shift(1)
-    revolutions = []
-    i = 0
-
-    for x in angle_diffs:
-        if x < -100:
-            i += 1
-        revolutions.append(i)
-
-    return pd.Series(revolutions)
 
 def power_from_torque(torque, x_force, cadence_radians, calibration_value=DEFAULT_CALIBRATION_VALUE):
     power_from_torque = torque * cadence_radians

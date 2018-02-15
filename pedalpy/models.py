@@ -5,40 +5,28 @@ from pandas.core.accessor import AccessorProperty
 import pandas.plotting._core as gfx
 
 
-def polar_force_column_labels():
-    return [f'_{i}' for i in range(361)]
+def torque_column_labels():
+    return [f'torque_{i}' for i in range(361)]
 
 
 class RevolutionPlotMethods(gfx.FramePlotMethods):
-    polar_angles = np.arange(90, 451) / (180 / np.pi)
-    polar_force_columns = polar_force_column_labels()
+    polar_angles = np.arange(0, 361) / (180 / np.pi)
+    torque_columns = torque_column_labels()
 
-    def _plot_single_polar(self, ax, polar_forces, mean, *args, **kwargs):
-        if 'linewidth' in kwargs:
-            linewidth = kwargs.pop('linewidth')
-        elif mean:
-            linewidth = 3
-        else:
-            linewidth = 0.5
-
-        ax.plot(self.polar_angles, polar_forces, linewidth=linewidth, *args, **kwargs)
-
-    def polar(self, full=False, mean=True, *args, **kwargs):
+    def polar(self, *args, **kwargs):
         ax = plt.subplot(111, projection='polar')
 
-        if full:
-            for i in range(0, len(self._data) - 50, 50):
-                forces = self._data.iloc[i:i + 50, self._data.columns.get_indexer(self.polar_force_columns)].mean()
-                self._plot_single_polar(ax, forces, mean=False, *args, **kwargs)
+        torque = self._data[self.torque_columns].mean()
 
-        if mean:
-            forces = self._data[self.polar_force_columns].mean()
-            self._plot_single_polar(ax, forces, mean=True, *args, **kwargs)
+        ax.plot(self.polar_angles, torque, *args, **kwargs)
+
+        ax.set_theta_offset(np.pi/2)
+        ax.set_theta_direction(-1)
 
         xticks_num = 8
-        xticks = np.arange(0, xticks_num, 2 * np.pi / xticks_num)
+        xticks = np.arange(0, 2*np.pi, 2 * np.pi / xticks_num)
         ax.set_xticks(xticks)
-        rad_to_label = lambda i: '{}°'.format(int(i / (2 * np.pi) * 360 - 90) % 180)
+        rad_to_label = lambda i: '{}°'.format(int(i / (2 * np.pi) * 360) % 180)
         ax.set_xticklabels([rad_to_label(i) for i in xticks])
         ax.set_yticklabels([])
 
