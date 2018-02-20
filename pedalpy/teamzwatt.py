@@ -19,9 +19,9 @@ def load_raw(filepath_or_buffer):
     )
 
 
-def load(filepath_or_buffer):
+def load(filepath_or_buffer, normalize=True):
     raw_data = load_raw(filepath_or_buffer)
-    return process_revolutions(raw_data)
+    return process_revolutions(raw_data, normalize)
 
 def zero_offset(power, calibration_value=DEFAULT_CALIBRATION_VALUE):
     power = power + calibration_value
