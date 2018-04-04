@@ -38,51 +38,16 @@ class RevolutionDataFrame(pd.DataFrame):
     def _constructor(self):
         return RevolutionDataFrame
 
-    def _add_polar_forces(self):
-        _df = pd.DataFrame()
-        new_angles = np.arange(0.0, 361.0)
-        column_labels = polar_force_column_labels()
-
-        if not '_0' in self.columns:
-            for label in column_labels:
-                self[label] = np.nan
-
-        for index, pf in self.polar_force.iteritems():
-            if not isinstance(pf, str):
-                continue
-
-            forces = [int(i) for i in pf.split(',')]
-            forces = np.array(forces + [forces[0]])
-            forces = forces/np.mean(forces)
-
-            angle_dx = 360.0 / (len(forces)-1)
-
-            forces_interp = np.interp(
-                x=new_angles,
-                xp=np.arange(0, 360.01, angle_dx),
-                fp=forces)
-
-            _df[index] = forces_interp
-
-        _df['angle'] = column_labels
-        _df.set_index('angle', inplace=True)
-        _df = _df.transpose()
-
-        for angle in column_labels:
-            self[angle] = _df[angle]
-
-        return self
-    
     def compute_min_max_angles(self):
         # @TODO this method is quite memory inefficient. Row by row calculation is better
-        pf_columns = polar_force_column_labels()
-        pf_T = self.loc[:, pf_columns].transpose().reset_index(drop=True)
+        torque_columns = torque_column_labels()
+        torque_T = self.loc[:, torque_columns].transpose().reset_index(drop=True)
 
-        left_max_angle = pf_T.iloc[:180].idxmax()
-        right_max_angle = pf_T.iloc[180:].idxmax() - 180
+        left_max_angle = torque_T.iloc[:180].idxmax()
+        right_max_angle = torque_T.iloc[180:].idxmax() - 180
         
-        left_min_angle = pd.concat([pf_T.iloc[:135], pf_T.iloc[315:]]).idxmin()
-        right_min_angle = pf_T.iloc[135:315].idxmin() - 180
+        left_min_angle = pd.concat([torque_T.iloc[:135], torque_T.iloc[315:]]).idxmin()
+        right_min_angle = torque_T.iloc[135:315].idxmin() - 180
 
         left_max = pd.DataFrame(left_max_angle)
         right_max = pd.DataFrame(right_max_angle)
