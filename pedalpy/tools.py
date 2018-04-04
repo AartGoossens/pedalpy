@@ -38,8 +38,9 @@ def normalize_to_median(array):
     if median:
         return array / median
     else:
-        # The case where array contains only zeroes
-        return array
+        # The case where array contains more zeroes than other values
+        return array / max(array)
+
 
 def process_revolutions(df, normalize=True):
     df = df.assign(revolution=label_revolutions(df.angle))

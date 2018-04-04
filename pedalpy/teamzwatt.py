@@ -13,7 +13,7 @@ def load_raw(filepath_or_buffer):
     return pd.read_csv(
         filepath_or_buffer=filepath_or_buffer,
         sep='\t',
-        skiprows=range(8),
+        skiprows=range(13),
         index_col=0,
         names=['index', 'time', 'x_force', 'y_force', 'power', 'torque', 'cadence', 'angle', 'longitude', 'latitude']
     )
@@ -44,7 +44,6 @@ def average_power_from_torque(power_from_torque, cadence):
         if cad != cadence_for_current_group:
             average_power = average_power + \
                 [np.average(power_for_current_group)] * len(power_for_current_group)
-            import pudb; pu.db
             cadence_for_current_group = cad
             power_for_current_group = [cad]
         else:

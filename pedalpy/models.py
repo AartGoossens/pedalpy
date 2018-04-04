@@ -21,7 +21,7 @@ class RevolutionPlotMethods(gfx.FramePlotMethods):
         ax.plot(self.polar_angles, torque, *args, **kwargs)
 
         ax.set_theta_offset(np.pi/2)
-        ax.set_theta_direction(-1)
+        # ax.set_theta_direction(-1)
 
         xticks_num = 8
         xticks = np.arange(0, 2*np.pi, 2 * np.pi / xticks_num)
